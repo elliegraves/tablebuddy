@@ -3,7 +3,6 @@ from toga.constants import COLUMN, ROW
 from toga.sources import Source
 from toga.style import Pack
 
-athletes = []
 class Athlete:
     def __init__(self, first_name, last_name, sex, exercise_level, age, height, weight):
         self.first_name = first_name
@@ -39,6 +38,7 @@ class Athlete:
     @property
     def daily_cal_target(self):
         return self.BMR * self.exercisefactor
+athletes = ['Sarah', 'Graves', "Female", 'Moderate', 16, 89, 100]
 
 class AthleteSource(Source):
     def __init__(self):
@@ -54,8 +54,7 @@ class AthleteSource(Source):
     def index(self, entry):
         return self._athletes.index(entry)
  #EG adding info       
-    def add(self, entry):
-        athlete = Athlete(*entry)
+    def add(self, athlete):
         self._athletes.append(athlete)
         self._athletes.sort(key=lambda m: m.first_name)
         self._notify('insert', index=self._athletes.index(athlete), item=athlete)    
@@ -87,7 +86,7 @@ class ExampleTableSourceApp(toga.App):
         print(ath.daily_cal_target)
         
     
-        self.table1.data.add((self.first_name_input.value,self.last_name_input.value,self.sexinput.value,self.exercise_level_input.value,self.ageinput.value, self.heightinput.value, self.weightinput.value))
+        self.table1.data.add(ath)
 
     def startup(self):
         
@@ -100,8 +99,8 @@ class ExampleTableSourceApp(toga.App):
         self.label = toga.Label('Ready.')
         self.table1 = toga.Table(
         
-            headings = ['First Name', 'Last Name', 'Sex','Exercise Level', 'Age', 'Height', 'Weight'],
-            accessors = ['first_name', 'last_name', 'sex', 'exercise_level', 'age', 'height', 'weight'], 
+            headings = ['First Name', 'Last Name', 'Sex','Exercise Level', 'Age', 'Height', 'Weight', 'BMR' ,'daily calorie target'],
+            accessors = ['first_name', 'last_name', 'sex', 'exercise_level', 'age', 'height', 'weight', 'BMR', 'daily_cal_target'], 
             data=AthleteSource(),
             style=Pack(flex=1),
             on_select=self.on_select_handler
@@ -141,7 +140,7 @@ class ExampleTableSourceApp(toga.App):
 
         # Populate the table
         for entry in athletes:
-            self.table1.data.add(entry)
+            self.table1.data.add()
         
         tablebox = toga.Box(children=[self.table1], style=Pack(flex=1))
         
