@@ -38,8 +38,7 @@ class Athlete:
     @property
     def daily_cal_target(self):
         return self.BMR * self.exercisefactor
-athletes = ['Sarah', 'Graves', "Female", 'Moderate', 16, 89, 100]
-
+athletes = []
 class AthleteSource(Source):
     def __init__(self):
         super().__init__()
