@@ -1,9 +1,13 @@
+#we're able to import different libraries of code for use in my program
 import toga
 from toga.constants import COLUMN, ROW
 from toga.sources import Source
 from toga.style import Pack
 
+#Classes provide a means of bundling data and functionality together
+#In this program we need an athlete and food class
 class Athlete:
+#ex of class data
     def __init__(self, first_name, last_name, sex, exercise_level, age, height, weight):
         self.first_name = first_name
         self.last_name = last_name
@@ -12,7 +16,7 @@ class Athlete:
         self.age = age
         self.height = height
         self.weight = weight
-
+#ex of class functionality
     @property
     def exercisefactor(self):
         if self.exercise_level=="Little-to-None":
@@ -38,30 +42,67 @@ class Athlete:
     @property
     def daily_cal_target(self):
         return self.BMR * self.exercisefactor
+#creating an empty list to start the table
 athletes = []
+
+#this class is useful for toga table construction and management
 class AthleteSource(Source):
     def __init__(self):
         super().__init__()
         self._athletes = []
-#e.g. docs say every list source must have this:
+
     def __len__(self):
         return len(self._athletes)
-#e.g. docs say every list source must have this:
+
     def __getitem__(self, index):
         return self._athletes[index]
-
     def index(self, entry):
         return self._athletes.index(entry)
- #EG adding info       
+ ##F
     def add(self, athlete):
         self._athletes.append(athlete)
         self._athletes.sort(key=lambda m: m.first_name)
         self._notify('insert', index=self._athletes.index(athlete), item=athlete)    
 
+#start
+class Food:
+#ex of class data
+    def __init__(self, food_name, food_category, cal_per_gram ):
+        self.food_name = food_name
+        self.food_category = food_category
+        self.cal_per_gram = cal_per_gram
+    
+#creating an empty list to start the table
+foods = []
+#start
+class FoodSource(Source):
+    def __init__(self):
+        super().__init__()
+        self._foods = []
+
+    def __len__(self):
+        return len(self._foods)
+
+    def __getitem__(self, index):
+        return self._foods[index]
+    def index(self, entry):
+        return self._foods.index(entry)
+ ##F
+    def add(self, food):
+        self._foods.append(food)
+        self._foods.sort(key=lambda m: m.food_name)
+        self._notify('insert', index=self._foods.index(food), item=food)  
+#end
+#end
+#this is the main application
 class ExampleTableSourceApp(toga.App):
     # Button callback functions
-    def on_select_handler(self, widget, row, **kwargs):
-        self.label.text = 'You selected row: {}'.format(row.title) if row is not None else 'No row selected'
+        #food stuff
+
+         #athlete 
+#takes user selection and assigns to a variable, these fire on_change or on_select
+#These variables are used later to create the athlete
+##C
     def first_name_select(self, selection):
         first_name = selection.value
     def last_name_select(self, selection):
@@ -76,16 +117,34 @@ class ExampleTableSourceApp(toga.App):
         height = selection.value
     def weight_select(self, selection):
         weight = selection.value
+
+#Food Info
+    def food_name_select(self, selection):
+        food_name = selection.value
+    def food_category_select(self, selection):
+        food_category = selection.value
+    def cal_per_gram_select(self, selection):
+        cal_per_gram = selection.value
     
     # EG looks like this is how we insert data into the table
+    #food
+    ##E
 
-    def insert_handler(self, widget, **kwargs):
+
+    def athlete_insert_handler(self, widget, **kwargs):
+        # creating a new instance of the athlete classe called ath 
         ath = Athlete(self.first_name_input.value,self.last_name_input.value,self.sexinput.value,self.exercise_level_input.value,self.ageinput.value, self.heightinput.value, self.weightinput.value)
-
-        print(ath.daily_cal_target)
-        
-    
-        self.table1.data.add(ath)
+    #now that we have an athlete we can do whatever we want, for example 
+    #print(ath.BMR)
+    # the ath data is inserted into the table using the add function
+        self.athlete_table1.data.add(ath)
+    def food_insert_handler(self, widget, **kwargs):
+        # creating a new instance of the athlete classe called ath 
+        food = Food(self.food_name_input.value,self.food_category_input.value,self.cal_per_gram_input.value)
+    #now that we have an athlete we can do whatever we want, for example 
+    #print(ath.BMR)
+    # the ath data is inserted into the table using the add function
+        self.food_table1.data.add(food)
 
     def startup(self):
         
@@ -96,14 +155,28 @@ class ExampleTableSourceApp(toga.App):
         box_style_2 = Pack(direction=COLUMN, padding=10)
         # Label to show which row is currently selected.
         self.label = toga.Label('Ready.')
-        self.table1 = toga.Table(
+        self.athlete_table1 = toga.Table(
         
             headings = ['First Name', 'Last Name', 'Sex','Exercise Level', 'Age', 'Height', 'Weight', 'BMR' ,'daily calorie target'],
             accessors = ['first_name', 'last_name', 'sex', 'exercise_level', 'age', 'height', 'weight', 'BMR', 'daily_cal_target'], 
             data=AthleteSource(),
             style=Pack(flex=1),
-            on_select=self.on_select_handler
         )
+    #start
+            # Label to show which row is currently selected.
+        self.label = toga.Label('Ready.')
+        self.food_table1 = toga.Table(
+        
+            headings = ['Food Name', 'Food Category', 'Cal Per Gram'],
+            accessors = ['food_name', 'food_category', 'cal_per_gram'], 
+            data=FoodSource(),
+            style=Pack(flex=1),
+        )
+    #end
+        #here are input values and we can set them equal to toga.(TextInput)since we imported toga in the beggining of the code
+        #these are functions called from our toga boxes that define the type of input, and what should happen on input
+        ##B
+        #this gives the ability to define each box as a togga class 
         self.first_name_input = toga.TextInput(
                             on_change=self.first_name_select,
 
@@ -135,17 +208,27 @@ class ExampleTableSourceApp(toga.App):
                             max_value = 500,
                             on_change = self.weight_select,
                         )
-        
+        #food info
+        self.food_name_input = toga.TextInput(
+                            on_change=self.food_name_select,
 
-        # Populate the table
-        for entry in athletes:
-            self.table1.data.add()
-        
-        tablebox = toga.Box(children=[self.table1], style=Pack(flex=1))
-        
-        self.box = toga.Box(
+                        )
+        self.food_category_input = toga.Selection(
+                            on_select=self.food_category_select,
+                            items=["Select", "Fruit", "Grains","Proteins","Vegetables","Dairy"],
+                        )
+        self.cal_per_gram_input = toga.NumberInput(
+                            on_change = self.cal_per_gram_select
+                        )
+
+#creating togaboxes to accept the user input
+#athlete related
+        athlete_tablebox = toga.Box(children=[self.athlete_table1], style=Pack(flex=1))
+        food_tablebox = toga.Box(children=[self.food_table1], style=Pack(flex=1))
+        #General info box 
+        ##A
+        self.welcome_box = toga.Box(
             children=[
-                #Welcome message
                 toga.Box(
                     style=box_style_2,
                     children=[
@@ -155,7 +238,17 @@ class ExampleTableSourceApp(toga.App):
                         ),
                         toga.Divider(style=Pack(direction=COLUMN, flex=1, padding=20)),
                     ],
-                ),
+                ),                
+                
+            ],
+            style=Pack(direction=COLUMN, padding=24),
+
+        )
+
+        self.athlete_box = toga.Box(
+            children=[
+
+
                 toga.Box(
                     style=box_style_1,
                     children=[
@@ -238,15 +331,69 @@ class ExampleTableSourceApp(toga.App):
             style=Pack(direction=COLUMN, padding=24),
 
         )
+        self.food_box = toga.Box(
+            children=[
+                toga.Box(
+                    style=box_style_2,
+                    children=[
+                        toga.Label(
+                            "Food",
+                            style=label_style,
+                        ),
+                        toga.Divider(style=Pack(direction=COLUMN, flex=1, padding=20)),
+                    ],
+                ),                
+                toga.Box(
+                    style=box_style_1,
+                    children=[
+                        toga.Label(
+                            "Food Name:",
+                            style=label_style,
+                        ),
+                        self.food_name_input
+                    ],
+                ),
+                toga.Box(
+                    style=box_style_1,
+                    children=[
+                        toga.Label(
+                            "Food Category:",
+                            style=label_style,
+                        ),
+                        self.food_category_input  
+                    ],
+                ),
+                toga.Box(
+                    style=box_style_1,
+                    children=[
+                        toga.Label(
+                            "Calories per gram:",
+                            style = label_style,
+                            
+                        ),
+                        self.cal_per_gram_input
 
+                    ],
+                ),
+            ],
+            style=Pack(direction=COLUMN, padding=24),
+
+        )
+#will put a food box here:
         # Buttons
         btn_style = Pack(flex=1)
-        btn_insert = toga.Button('Add Athlete', on_press=self.insert_handler, style=btn_style)
-        btn_box = toga.Box(children=[btn_insert], style=Pack(direction=ROW))
-
+        #once we've got user data stored we're now ready to add an athlete which we do by firing insert_handler
+        ##D
+        athlete_btn_insert = toga.Button('Add athlete', on_press=self.athlete_insert_handler, style=btn_style)
+        athlete_btn_box = toga.Box(children=[athlete_btn_insert], style=Pack(direction=ROW))
+        food_btn_insert = toga.Button('Add food', on_press=self.food_insert_handler, style=btn_style)
+        food_btn_box = toga.Box(children=[food_btn_insert], style=Pack(direction=ROW))
         # Most outer box
+  
+        #new food section end
+        #new food section start
         outer_box = toga.Box(
-            children=[self.box, btn_box, tablebox, self.label],
+            children=[self.welcome_box, self.athlete_box, athlete_btn_box, athlete_tablebox, self.label, self.food_box,food_btn_box, food_tablebox],
             style=Pack(
                 flex=1,
                 direction=COLUMN,
